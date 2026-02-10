@@ -19,12 +19,13 @@ package com.funniray.lobbybalancer.handlers;
 
 import com.funniray.lobbybalancer.Utils;
 import dev.waterdog.waterdogpe.network.connection.handler.IReconnectHandler;
+import dev.waterdog.waterdogpe.network.connection.handler.ReconnectReason;
 import dev.waterdog.waterdogpe.network.serverinfo.ServerInfo;
 import dev.waterdog.waterdogpe.player.ProxiedPlayer;
 
 public class LobbyReconnectHandler implements IReconnectHandler {
     @Override
-    public ServerInfo getFallbackServer(ProxiedPlayer player, ServerInfo oldServer, String kickMessage) {
+    public ServerInfo getFallbackServer(ProxiedPlayer player, ServerInfo oldServer, ReconnectReason reason, String kickMessage) {
         ServerInfo info = Utils.findServer(oldServer);
         if (info == null) {
             player.disconnect("§cUnable to find a suitable lobby server to join");

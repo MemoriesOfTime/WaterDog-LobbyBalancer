@@ -20,18 +20,15 @@ package com.funniray.lobbybalancer;
 import dev.waterdog.waterdogpe.ProxyServer;
 import dev.waterdog.waterdogpe.network.serverinfo.BedrockServerInfo;
 import dev.waterdog.waterdogpe.network.serverinfo.ServerInfo;
-import jline.internal.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Utils {
 
-    private static HashMap<String, Boolean> onlineCache;
-
-    public static ServerInfo findServer(@Nullable ServerInfo oldServer) {
+    public static @Nullable ServerInfo findServer(@Nullable ServerInfo oldServer) {
         //We only want lobby servers that are online
 
         LobbyBalancer.getInstance().getLogger().debug(" >>> Got request to join server");
@@ -40,7 +37,6 @@ public class Utils {
                 .stream()
                 .filter(Utils::isServerLobby)
                 .filter((serverInfo -> !serverInfo.equals(oldServer)))
-                .filter(CacheThread::isServerOnline)
                 .collect(Collectors.toList());
 
         //If a server has less than the minimum players, prioritize them
@@ -75,12 +71,18 @@ public class Utils {
             return;
         }
 
-        //We have to put in a random address
-        ServerInfo baseInfo = ProxyServer.getInstance().getServers()
+        List<ServerInfo> lobbyServers = ProxyServer.getInstance().getServers()
                 .stream()
                 .filter(Utils::isServerLobby)
-                .collect(Collectors.toList())
-                .get(0);
+                .collect(Collectors.toList());
+
+        if (lobbyServers.isEmpty()) {
+            LobbyBalancer.getInstance().getLogger().fatal("No lobby servers found with prefix: " + lobbyPrefix);
+            return;
+        }
+
+        //We have to put in a random address
+        ServerInfo baseInfo = lobbyServers.get(0);
 
         ServerInfo baseLobby = new BedrockServerInfo(lobbyPrefix,baseInfo.getAddress(), null);
         ProxyServer.getInstance().registerServerInfo(baseLobby);

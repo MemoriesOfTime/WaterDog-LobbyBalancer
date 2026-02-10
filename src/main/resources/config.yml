@@ -28,12 +28,3 @@ lobbyprefix: lobby
 #Once all lobby servers get to the minimum players, then the player will join the server with the least amount of players
 #This order is determined by the order of your servers in the WaterdogPE config
 minplayers: 10
-
-#Ping timeout in seconds for checking if a lobby is online
-pingtimeout: 5
-
-#Frequency servers are pinged in minutes
-pingfrequency: 1
-
-#If we should log to the console when a ping fails
-logfailedpings: true
