@@ -62,7 +62,9 @@ public final class LobbyBalancer extends Plugin {
         this.getProxy().setReconnectHandler(new LobbyReconnectHandler());
         this.getProxy().getEventManager().subscribe(ServerTransferRequestEvent.class, Listeners::PreTransferHandler);
 
-        this.getProxy().getCommandMap().registerCommand(new LobbyCommand());
+        if (this.getConfig().getBoolean("lobbycommand", true)) {
+            this.getProxy().getCommandMap().registerCommand(new LobbyCommand());
+        }
     }
 
     @Override

@@ -28,3 +28,7 @@ lobbyprefix: lobby
 #Once all lobby servers get to the minimum players, then the player will join the server with the least amount of players
 #This order is determined by the order of your servers in the WaterdogPE config
 minplayers: 10
+
+#Whether to register the /lobby command
+#Set to false to disable the lobby command
+lobbycommand: true
