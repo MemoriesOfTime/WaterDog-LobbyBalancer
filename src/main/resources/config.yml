@@ -17,10 +17,6 @@
 #Transfers to this prefix will send a player to a lobby, acting the same as if they join
 lobbyprefix: lobby
 
-#If messages sent to lobbies should be broadcasted to players in another lobby
-#Not yet implemented
-#lobbybroadcast: false
-
 #Minimum players in a lobby before balancing to another server
 #A lobby must have x amount of players before another lobby starts getting players
 #Helps your server in theory not look dead if all lobbies barely have players
