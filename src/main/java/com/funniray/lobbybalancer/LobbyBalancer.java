@@ -20,6 +20,7 @@ package com.funniray.lobbybalancer;
 import com.funniray.lobbybalancer.commands.LobbyCommand;
 import com.funniray.lobbybalancer.handlers.LobbyJoinHandler;
 import com.funniray.lobbybalancer.handlers.LobbyReconnectHandler;
+import com.funniray.lobbybalancer.motd.MotdPlayerCounter;
 import dev.waterdog.waterdogpe.event.defaults.ServerTransferRequestEvent;
 import dev.waterdog.waterdogpe.plugin.Plugin;
 
@@ -47,6 +48,7 @@ public final class LobbyBalancer extends Plugin {
     }
 
     private static LobbyBalancer instance;
+    private MotdPlayerCounter motdPlayerCounter;
 
     @Override
     public void onEnable() {
@@ -65,14 +67,26 @@ public final class LobbyBalancer extends Plugin {
         if (this.getConfig().getBoolean("lobbycommand", true)) {
             this.getProxy().getCommandMap().registerCommand(new LobbyCommand());
         }
+
+        if (this.getConfig().getBoolean("use-motd-query", false)) {
+            int interval = this.getConfig().getInt("motd-query-interval", 30);
+            this.motdPlayerCounter = new MotdPlayerCounter();
+            this.motdPlayerCounter.start(interval);
+        }
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        if (this.motdPlayerCounter != null) {
+            this.motdPlayerCounter.shutdown();
+        }
     }
 
     public static LobbyBalancer getInstance() {
         return instance;
+    }
+
+    public MotdPlayerCounter getMotdPlayerCounter() {
+        return motdPlayerCounter;
     }
 }

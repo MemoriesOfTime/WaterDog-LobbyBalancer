@@ -17,6 +17,7 @@
 
 package com.funniray.lobbybalancer;
 
+import com.funniray.lobbybalancer.motd.MotdPlayerCounter;
 import dev.waterdog.waterdogpe.ProxyServer;
 import dev.waterdog.waterdogpe.network.serverinfo.BedrockServerInfo;
 import dev.waterdog.waterdogpe.network.serverinfo.ServerInfo;
@@ -24,7 +25,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -33,15 +33,23 @@ public class Utils {
 
         LobbyBalancer.getInstance().getLogger().debug(" >>> Got request to join server");
 
+        MotdPlayerCounter motdCounter = LobbyBalancer.getInstance().getMotdPlayerCounter();
+
         List<ServerInfo> lobbies = ProxyServer.getInstance().getServers()
                 .stream()
                 .filter(Utils::isServerLobby)
                 .filter((serverInfo -> !serverInfo.equals(oldServer)))
-                .collect(Collectors.toList());
+                .filter(serverInfo -> {
+                    if (motdCounter != null) {
+                        return motdCounter.getPlayerCount(serverInfo.getServerName()) >= 0;
+                    }
+                    return true;
+                })
+                .toList();
 
         //If a server has less than the minimum players, prioritize them
         for(ServerInfo lobby : lobbies) {
-            if (lobby.getPlayers().size() < LobbyBalancer.getInstance().getConfig().getInt("minplayers")) {
+            if (getPlayerCount(lobby) < LobbyBalancer.getInstance().getConfig().getInt("minplayers")) {
                 LobbyBalancer.getInstance().getLogger().debug(" >>> Decided server based off of minimum players");
                 return lobby;
             }
@@ -49,10 +57,10 @@ public class Utils {
 
         //Otherwise, return the server with the least amount of players
         List<ServerInfo> sortedLobbies = lobbies.stream()
-                .sorted(Comparator.comparingInt(a -> a.getPlayers().size()))
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparingInt(Utils::getPlayerCount))
+                .toList();
 
-        if (sortedLobbies.size()==0) {
+        if (sortedLobbies.isEmpty()) {
             LobbyBalancer.getInstance().getLogger().fatal("Failed to find a valid server to join");
             return null;
         }
@@ -60,6 +68,20 @@ public class Utils {
         LobbyBalancer.getInstance().getLogger().debug(" >>> Decided server based off of the least amount of players");
 
         return sortedLobbies.get(0);
+    }
+
+    /**
+     * 获取服务器在线人数。若 MOTD 查询启用则使用 MOTD 数据，否则回退到代理内部记录。
+     */
+    public static int getPlayerCount(ServerInfo server) {
+        MotdPlayerCounter motdCounter = LobbyBalancer.getInstance().getMotdPlayerCounter();
+        if (motdCounter != null) {
+            int count = motdCounter.getPlayerCount(server.getServerName());
+            if (count >= 0) {
+                return count;
+            }
+        }
+        return server.getPlayers().size();
     }
 
     public static void createLobby() {
@@ -74,7 +96,7 @@ public class Utils {
         List<ServerInfo> lobbyServers = ProxyServer.getInstance().getServers()
                 .stream()
                 .filter(Utils::isServerLobby)
-                .collect(Collectors.toList());
+                .toList();
 
         if (lobbyServers.isEmpty()) {
             LobbyBalancer.getInstance().getLogger().fatal("No lobby servers found with prefix: " + lobbyPrefix);

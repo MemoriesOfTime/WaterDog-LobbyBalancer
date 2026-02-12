@@ -32,3 +32,11 @@ minplayers: 10
 #Whether to register the /lobby command
 #Set to false to disable the lobby command
 lobbycommand: true
+
+#Whether to use MOTD query to get real player counts from downstream servers
+#Enable this for multi-proxy deployments where each proxy only knows its own players
+#When enabled, player counts are fetched directly from servers via UDP MOTD protocol
+use-motd-query: false
+
+#MOTD query interval in seconds
+motd-query-interval: 30
