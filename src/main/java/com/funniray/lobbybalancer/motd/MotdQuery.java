@@ -31,6 +31,10 @@ public class MotdQuery {
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setSoTimeout(TIMEOUT_MS);
 
+            if (address.isUnresolved()) {
+                address = new InetSocketAddress(address.getHostString(), address.getPort());
+            }
+
             DatagramPacket sendPacket = new DatagramPacket(
                     QUERY_PACKET, QUERY_PACKET.length, address
             );
